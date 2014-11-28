@@ -11,143 +11,195 @@
 #include <sys/un.h>
 
 
-bool SuperTcpManager::running = true;
+bool SuperTcpManager::programRunning(true);
+int SuperTcpManager::countRunningServers(0);
+int SuperTcpManager::counterId = 0;
 
 void superSigHandler(int signo)
 {
-    if (signo == SIGINT || signo == SIGTERM)
+    if ( signo == SIGINT || signo == SIGTERM )
     {
-        SuperTcpManager::running = false;
         fprintf(stderr, "You kill me, NOOOOOOOOOOOO\n");
+        SuperTcpManager::programRunning = false;
     }
+    while (SuperTcpManager::countRunningServers > 0)
+    {
+//        fprintf(stderr, "count = %d\n", SuperTcpManager::countRunningServers);
+    }
+
 //    exit(0);
 }
 
+
 SuperTcpManager::SuperTcpManager()
-    : hostName("127.0.0.1")
+    : epollEngineer(new EpollEngineer())
 {
-    events = new epoll_event[MAXEVENTS];
-    epollFileDescriptor = epoll_create1(0);
     signal(SIGINT, superSigHandler);
     signal(SIGTERM, superSigHandler);
+    QObject::connect(epollEngineer.get(), SIGNAL(newMessageEpoll(int, QString)), this, SLOT(newMessageReceivedEpoll(int,QString)));
+    QObject::connect(epollEngineer.get(), SIGNAL(newConnection(int)), this, SLOT(newConnectionEpoll(int)));
+    QObject::connect(epollEngineer.get(), SIGNAL(closedConnection(int)), this, SLOT(closedConnectionEpoll(int)));
+    serverPort = const_cast<char*>("34348");
+//    serverHostname = const_cast<char*>("194.85.160.55");
+//    defaultHostName = const_cast<char*>("172.21.4.168");
+//    serverHostname = const_cast<char*>("188.227.78.184");
+//    serverHostname = const_cast<char*>("192.108.2.90");
+    serverHostname = const_cast<char*>("INADDR_ANY");
+    maxPendingConnections = 10;
+    epollEngineer->addServer();
 }
 
 SuperTcpManager::~SuperTcpManager()
 {
-    delete[] events;
-    for (auto pfd : listeningPorts)
+    printDebug("Destructor start");
+    for (auto pfd : listenSockets)
     {
-        ::close(pfd);
+        epollEngineer->removeListenSocket(pfd);
     }
-    fprintf(stderr, "Destructor\n");
+    for (auto pfd : dataSocketToId)
+    {
+        epollEngineer->removeDataSocket(pfd.first);
+    }
+    epollEngineer->removeServer();
+    printDebug("Destructor close");
 }
 
-int SuperTcpManager::makeSocketNonBlocking(int sfd)
+void SuperTcpManager::newConnectionEpoll(int clientFd)
+{
+    addSocket(clientFd);
+    emit newConnection(dataSocketToId[clientFd]);
+}
+
+void SuperTcpManager::closedConnectionEpoll(int clientFd)
+{
+    if (dataSocketToId.find(clientFd) != dataSocketToId.end())
+    {
+        dataSocketToId.erase(clientFd);
+    }
+}
+
+void SuperTcpManager::newMessageReceivedEpoll(int clientFd, QString message)
+{
+    int clientId = dataSocketToId[clientFd];
+    emit newMessageReceived(clientId, message);
+}
+
+void SuperTcpManager::makeSocketNonBlocking(int sfd)
 {
     int flags, s;
 
     flags = fcntl(sfd, F_GETFL, 0);
     if (flags == -1)
     {
-        return -1;
+        throw SuperSocketOptionsException();
     }
 
     flags |= O_NONBLOCK;
     s = fcntl(sfd, F_SETFL, flags);
     if (s == -1)
     {
-        return -1;
+        throw SuperSocketOptionsException();
     }
-
-    return 0;
 }
 
 int SuperTcpManager::createAndBind(const char *port)
 {
-
-    int sock;
-
-    sockaddr_in name;
-
-    sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock == -1)
-    {
-        return -1;
-    }
-
-    name.sin_family = AF_INET;
-    name.sin_port = htons(std::strtoul(port, NULL, 0));
-//    name.sin_addr.s_addr = htonl(INADDR_ANY);
-    name.sin_addr.s_addr = inet_addr(hostName);
-
-    if (bind(sock, (sockaddr*)(&name), sizeof name) == -1)
-    {
-        fprintf(stderr, "bind problem\n");
-        return -1;
-    }
-    return sock;
-
-    addrinfo hints;
-    addrinfo *result;
-
-    int sfd;
-
-    memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_INET;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE;
-    hints.ai_addr = INADDR_ANY;
-
-    int s = getaddrinfo(NULL, port, &hints, &result);
-    if (s != 0)
-    {
-        return -1;
-    }
-
-    addrinfo *rp;
-
-    for (rp = result; rp != NULL; rp = rp->ai_next)
-    {
-        sfd = socket(rp->ai_family, rp->ai_flags, rp->ai_protocol);
-        if (sfd == -1)
-        {
-            continue;
-        }
-
-        s = bind(sfd, rp->ai_addr, rp->ai_addrlen);
-        if (s == -1)
-        {
-            ::close(sfd);
-            continue;
-        }
-
-        break;
-    }
-
-    if (rp == NULL)
-    {
-        return -1;
-    }
-
-    freeaddrinfo(result);
-
-    return sfd;
-}
-
-void SuperTcpManager::connect(const char* hostname, const char *port)
-{
-    fprintf(stderr, "start connecting %s to %s\n", hostname, port);
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock == -1)
     {
-        return;
+        throw SuperSocketCreateException();
+    }
+
+    int optval = 1;
+    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof (int)) == -1)
+    {
+        throw SuperSocketCreateException();
+    }
+
+    sockaddr_in name;
+    name.sin_family = AF_INET;
+    name.sin_port = htons(std::strtoul(port, NULL, 0));
+    name.sin_addr.s_addr = (strcmp(serverHostname, "INADDR_ANY") == 0) ? INADDR_ANY : (inet_addr(serverHostname));
+
+    if (bind(sock, (sockaddr*)(&name), sizeof name) == -1)
+    {
+        printDebug("bind problem on", port, "num =", sock, "host", (inet_addr(serverHostname)));
+        throw SuperBindingException();
+    }
+    return sock;
+
+}
+
+
+void SuperTcpManager::addSocket(int sockfd)
+{
+    epollEngineer->addDataSocket(sockfd);
+    int newId = getNewId();
+    dataIdToSocket[newId] = sockfd;
+    dataSocketToId[sockfd] = newId;
+}
+
+void SuperTcpManager::addSocket(int sockfd, const char* port)
+{
+    epollEngineer->addListenSocket(sockfd);
+    listenSockets.push_back(sockfd);
+    listenPorts.push_back(std::strtoul(port, NULL, 0));
+}
+
+void SuperTcpManager::removeSocket(int sockfd, int sockId)
+{
+    if (sockId != -1)
+    {
+        epollEngineer->removeDataSocket(sockfd);
+        dataIdToSocket.erase(sockId);
+        dataSocketToId.erase(sockfd);
+    }
+    else
+    {
+        epollEngineer->removeListenSocket(sockfd);
+        auto lit = find(listenSockets.begin(), listenSockets.end(), sockfd);
+        size_t pos = lit - listenSockets.begin();
+        listenSockets.erase(lit);
+        listenPorts.erase(listenPorts.begin() + pos);
+    }
+}
+
+int SuperTcpManager::getNewId()
+{
+    counterId++;
+    if (counterId <= 0)
+    {
+        counterId = 1;
+    }
+
+    return counterId;
+}
+
+//void SuperTcpManager::removeId(int dataId)
+//{
+//    if (dataIdToSocket.find(dataId) == dataIdToSocket.end())
+//    {
+//        throw SuperInvalidArgumentException();
+//    }
+//    int sockfd = dataIdToSocket[dataId];
+//    closeSocket(sockfd);
+//    dataIdToSocket.erase(dataId);
+//    dataSocketToId.erase(sockfd);
+//}
+
+int SuperTcpManager::connect(const char* hostname, const char *port)
+{
+    printDebug("start connecting to", hostname, "on port", port);
+    int sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock == -1)
+    {
+        throw SuperSocketCreateException();
     }
 
     hostent *hostinfo = gethostbyname(hostname);
     if (hostinfo == NULL)
     {
-        fprintf(stderr, "unknown host %s\n", hostname);
-        return;
+        throw SuperInvalidArgumentException();
     }
     sockaddr_in servername;
     servername.sin_family = hostinfo->h_addrtype;
@@ -156,256 +208,180 @@ void SuperTcpManager::connect(const char* hostname, const char *port)
 
     if (::connect(sock, (sockaddr*)&servername, sizeof servername) == -1)
     {
-        fprintf(stderr, "unable to connect\n");
-        return;
+        throw SuperConnectException();
     }
 
-    listeningPorts.push_back(sock);
-    fprintf(stderr, "end connecting %s to %s\n", hostname, port);
-    return;
+    makeSocketNonBlocking(sock);
 
-    addrinfo hints, *serverinfo, *p;
-    fprintf(stderr, "start connecting %s to %s\n", hostname, port);
-//    сhar buf[MAXDATASIZE];
-//    сhar s[INET6_ADDRSTRLEN];
-
-//    hostent *host = gethostbyname(hostname);
-//    if (host == NULL)
-//    {
-//        fprintf(stderr, "unknown host: %s", hostname);
-//        return;
-//    }
-
-//    int sockfd = socket(AF_UNSPEC, SOCK_STREAM, 0);
-//    if (sockfd == -1)
-//    {
-//        fprintf(stderr, "unable to create socket");
-//        return;
-//    }
-
-//    int broadcast = 1;
-
-
-    memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_INET;
-    hints.ai_socktype = SOCK_STREAM;
-
-    int rv;
-    if ((rv = getaddrinfo(hostname, port, &hints, &serverinfo)) != 0)
-    {
-        fprintf(stderr, "getaddrinfo: %sn", gai_strerror(rv));
-        return;
-    }
-
-    int sockfd;
-    int optSocket = 1;
-    for (p = serverinfo; p != NULL; p = p->ai_next)
-    {
-        sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol);
-        if (sockfd == -1)
-        {
-            fprintf(stderr, "fail socket: %d\n", p->ai_family);
-            continue;
-        }
-
-//        if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &optSocket, sizeof (int)) == -1)
-//        {
-//            fprintf(stderr, "fail setsockopt: %d\n", p->ai_family);
-//            return;
-//        }
-
-        if (::connect(sockfd, p->ai_addr, p->ai_addrlen) == -1)
-        {
-            fprintf(stderr, "fail connect: %d addr: %d\n", sockfd, p->ai_addr);
-            ::close(sockfd);
-            continue;
-        }
-
-        break;
-    }
-
-    if (p == NULL)
-    {
-        // fail to connect
-        fprintf(stderr, "fail to connect because null\n");
-        return;
-    }
-
-    listeningPorts.push_back(sockfd);
-    fprintf(stderr, "end connecting %s to %s\n", hostname, port);
+    addSocket(sock);
+    printDebug("connected to", hostname, " on ", port);
+    return sock;
 }
 
-void SuperTcpManager::sendToAll(const char *message, const size_t len)
+void SuperTcpManager::disconnect(int dataId)
 {
-    for (auto portFd : listeningPorts)
+    auto fit = dataIdToSocket.find(dataId);
+    if (fit == dataIdToSocket.end())
     {
-        int s = ::write(portFd, message, len);
+        throw SuperInvalidArgumentException();
+    }
+    removeSocket(fit->second, fit->first);
+}
+
+int SuperTcpManager::sendToAll(const char *message, int len)
+{
+    if (len == -1)
+    {
+        len = strlen(message);
+    }
+    int result = 0;
+    for (auto portFd : dataIdToSocket)
+    {
+        int s = ::write(portFd.second, message, len);
         if (s == -1)
         {
-            fprintf(stderr, "failed to send: %s", message);
-            return;
+            printDebug("failed to send to", portFd.first);
+            continue;
         }
-        fprintf(stderr, "sended: %s", message);
+        printDebug("sended to", portFd.first);
+        result++;
+    }
+    return result;
+}
+
+int SuperTcpManager::sendToAllExclude(const std::vector<int> &blackList, const char *message, int len)
+{
+    if (len == -1)
+    {
+        len = strlen(message);
+    }
+
+    int result = 0;
+    for (auto client : dataIdToSocket)
+    {
+        if (find(blackList.begin(), blackList.end(), client.first) == blackList.end())
+        {
+            try
+            {
+                sendTo(client.first, message, len);
+            }
+            catch (SuperTcpManagerException e)
+            {
+                result--;
+            }
+            result++;
+        }
+    }
+    return result;
+}
+
+void SuperTcpManager::sendTo(int clientId, const char *message, int len)
+{
+    auto dit = dataIdToSocket.find(clientId);
+    if (dit == dataIdToSocket.end())
+    {
+        throw SuperInvalidArgumentException();
+    }
+
+    if (len == -1)
+    {
+        len = strlen(message);
+    }
+    int s = ::write(dit->second, message, len);
+    if (s == -1)
+    {
+        throw SuperSendException();
     }
 }
 
-void SuperTcpManager::listen(const char* port)
+int SuperTcpManager::listen()
 {
-    fprintf(stderr, "start listening %s\n", port);
+    return listen(serverPort);
+}
+
+int SuperTcpManager::listen(const char* port)
+{
+    printDebug("start listening", port);
     int sfd = createAndBind(port);
-    if (sfd == -1)
+
+    if (::listen(sfd, maxPendingConnections) == -1)
     {
-        fprintf(stderr, "fail to create %s\n", port);
-        return;
+        throw SuperListeningException();
     }
 
-    if (::listen(sfd, MAXCONNECTIONS) == -1)
-    {
-        fprintf(stderr, "fail epoll %d %d\n", epollFileDescriptor, sfd);
-        return;
-    }
+    makeSocketNonBlocking(sfd);
 
-
-    int s = makeSocketNonBlocking(sfd);
-    if (s == -1)
-    {
-        fprintf(stderr, "fail to non block %s\n", port);
-        return;
-    }
-
-    event.data.fd = sfd;
-    event.events = EPOLLIN | EPOLLET;
-    s = epoll_ctl(epollFileDescriptor, EPOLL_CTL_ADD, sfd, &event);
-    if (s == -1)
-    {
-        fprintf(stderr, "fail epoll %d %d\n", epollFileDescriptor, sfd);
-        return;
-    }
-    listeningPorts.push_back(sfd);
-    fprintf(stderr, "end listening %s\n", port);
+    addSocket(sfd, port);
+    printDebug("end listening", port);
+    return sfd;
 }
 
-void SuperTcpManager::start()
+void SuperTcpManager::unlisten(const char *port)
 {
-    running = true;
-    while (running)
+    int portNum = std::strtoul(port, NULL, 0);
+    auto fit = find(listenPorts.begin(), listenPorts.end(), portNum);
+    if (fit == listenPorts.end())
     {
-        fprintf(stderr, "start epoll\n");
-        int nfds = epoll_wait (epollFileDescriptor, events, MAXEVENTS, -1);
-        if (nfds == -1)
-        {
-            break;
-        }
-        fprintf(stderr, "get epoll events %d\n", nfds);
-        for (int i = 0; i < nfds; i++)
-        {
-            if ((events[i].events & EPOLLERR) ||
-                  (events[i].events & EPOLLHUP) ||
-                  (!(events[i].events & EPOLLIN)))
-            {
-                // error
-                ::close (events[i].data.fd);
-                continue;
-            }
-            else if (find(listeningPorts.begin(), listeningPorts.end(), events[i].data.fd) != listeningPorts.end())
-            {
-                // input connection
-                auto portFd =find(listeningPorts.begin(), listeningPorts.end(), events[i].data.fd);
-                fprintf(stderr, "input connection on %d\n", *portFd);
-                while (true)
-                {
-                    sockaddr in_addr;
-                    socklen_t in_len = sizeof (struct sockaddr);
-                    int infd = accept(*portFd, &in_addr, &in_len);
-                    fprintf(stderr, "get accept: %d\n", infd);
-                    char hbuf[NI_MAXHOST], sbuf[NI_MAXSERV];
-
-                    if (infd == -1)
-                    {
-                        if ((errno == EAGAIN) || (errno == EWOULDBLOCK))
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            perror("accept");
-                            break;
-                        }
-                    }
-
-                    int s = getnameinfo(&in_addr, in_len,
-                                    hbuf, sizeof hbuf,
-                                    sbuf, sizeof sbuf,
-                                    NI_NUMERICHOST | NI_NUMERICSERV);
-                    if (s == 0)
-                    {
-                        printf("Accepted connection desc = %d host = %s port = %s", infd, hbuf, sbuf);
-                    }
-
-                    s = makeSocketNonBlocking(infd);
-                    if (s == -1)
-                    {
-                        return;
-                    }
-
-                    event.data.fd = infd;
-                    event.events = EPOLLIN | EPOLLET;
-                    s = epoll_ctl(epollFileDescriptor, EPOLL_CTL_ADD, infd, &event);
-                    fprintf(stderr, "get epoll: %d\n", s);
-                    if (s == -1)
-                    {
-                        perror("epoll_ctl");
-                        return;
-                    }
-                    break;
-                }
-//                listeningPorts.erase(portFd);
-                continue;
-            }
-            else
-            {
-                bool closeConnection = false;
-
-                while (true)
-                {
-                    char buf[MAXDATASIZE];
-                    memset(buf, 0, sizeof buf);
-
-                    ssize_t count = read(events[i].data.fd, buf, sizeof buf);
-                    if (count == -1)
-                    {
-                        if (errno != EAGAIN)
-                        {
-                            closeConnection = true;
-                        }
-                        break;
-                    }
-                    else if (count == 0)
-                    {
-                        closeConnection = true;
-                        break;
-                    }
-
-                    int s = write(1, buf, count);
-                    fprintf(stderr, buf);
-                    fprintf(stderr, "\n");
-                    if (s == -1)
-                    {
-                        perror("write");
-                        return;
-                    }
-                }
-
-                if (closeConnection)
-                {
-                    printf("Close descriptor %d\n", events[i].data.fd);
-
-                    ::close(events[i].data.fd);
-                }
-
-            }
-        }
+        throw SuperInvalidArgumentException();
     }
-    running = false;
 
+    size_t pos = fit - listenPorts.begin();
+    removeSocket(listenSockets[pos], -1);
+}
+
+
+void SuperTcpManager::execute()
+{
+}
+
+const char *SuperTcpManager::getServerPort() const
+{
+    return serverPort;
+}
+
+void SuperTcpManager::setServerPort(const char *value)
+{
+    strcpy(serverPort, value);
+}
+int SuperTcpManager::getMaxPendingConnections() const
+{
+    return maxPendingConnections;
+}
+
+void SuperTcpManager::setMaxPendingConnections(int value)
+{
+    maxPendingConnections = value;
+}
+
+const char *SuperTcpManager::getServerHostname() const
+{
+    return serverHostname;
+}
+
+void SuperTcpManager::setServerHostname(const char *value)
+{
+    strcpy(serverHostname, value);
+}
+
+void SuperTcpManager::startServer()
+{
+//    serverRunning = true;
+//    countRunningServers++;
+//    try
+//    {
+//        execute();
+//    }
+//    catch (SuperTcpManagerException e)
+//    {
+//        serverRunning = false;
+//        countRunningServers--;
+//        throw e;
+//    }
+//    serverRunning = false;
+//    countRunningServers--;
+}
+
+void SuperTcpManager::stopServer()
+{
+    serverRunning = false;
 }

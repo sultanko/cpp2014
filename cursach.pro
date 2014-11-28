@@ -15,11 +15,11 @@ CONFIG += c++11
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    supertcpserver.cpp \
-    supertcpmanager.cpp
+    supertcpmanager.cpp \
+    epollengineer.cpp
 
 HEADERS  += mainwindow.h \
-    supertcpserver.h \
-    supertcpmanager.h
+    supertcpmanager.h \
+    epollengineer.h
 
 FORMS    += mainwindow.ui
