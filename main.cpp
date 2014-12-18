@@ -1,9 +1,25 @@
 #include "mainwindow.h"
 #include <QApplication>
 #include "supertcpmanager.h"
+#include "httpresponse.h"
+#include "httpserver.h"
 #include <signal.h>
 #include <QObject>
+#include <memory>
+#include <functional>
 
+void message(MainWindow* w, int v)
+{
+    SuperTcpManager::printDebug("received", v);
+    emit w->messageSignal(v);
+}
+
+void messageResponse(MainWindow* w, HttpResponse response)
+{
+    w->buf.assign(response.getResponseBuffer().begin(), response.getResponseBuffer().end());
+    SuperTcpManager::printDebug("responseBuffer ixooooo", response.getResponseSize());
+    emit w->messageSignal((int) response.getResponseSize());
+}
 
 int main(int argc, char *argv[])
 {
@@ -11,30 +27,34 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.show();
 
-    SuperTcpManager superTcpServer;
-    w.setServer(&superTcpServer);
-    QObject::connect(&superTcpServer, &SuperTcpManager::newMessageReceived,
-                     &w, &MainWindow::showMessageFromServer);
-    const int var = 1;
+//    SuperTcpManager superTcpServer;
+
+    const int var = 3;
+    auto func = std::bind(&messageResponse, &w, std::placeholders::_1);
+//    HttpServer server;
     if (var == 1)
     {
         w.setWindowTitle("Server");
-        superTcpServer.listen();
+//        auto func = std::bind(&MainWindow::displayMessage, &w, std::placeholders::_1);
+/*        w.setSocket(superTcpServer.listen([&](ClientSocket* socket)
+        {
+            socket->setFunction(func);
+            socket->setBuffer(w.buf);
+            socket->setBufferSize(MainWindow::BUF_SIZE);
+        }));*/
+//        raise(SIGINT);
 //        superTcpServer.startServer();
     }
-    else
+    else if (var == 2)
     {
         w.setWindowTitle("Client");
-        superTcpServer.connect("192.168.102.52", "80");
-        superTcpServer.connect("127.0.0.1", superTcpServer.getServerPort());
-//        superTcpServer.connect("188.227.78.184", superTcpServer.getServerPort());
-        superTcpServer.sendToAll("Hello server!");
+        HttpRequest request;
+        request.setMethod("GET");
+        request.setUrl("/files/1mb.txt");
+        request.setHost("androidnetworktester.googlecode.com");
+//        server.send(request, func);
+//        w.setSocket(superTcpServer.connect("127.0.0.1", superTcpServer.getServerPort().c_str(), func, w.buf, MainWindow::BUF_SIZE));
     }
 
-//    int n;
-//    scanf("%d", &n);
-
-//    superTcpServer.stopServer();
     return a.exec();
-    return 0;
 }

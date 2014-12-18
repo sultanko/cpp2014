@@ -11,15 +11,28 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = cursach
 TEMPLATE = app
 CONFIG += c++11
+#CONFIG += g
 
 
 SOURCES += main.cpp\
         mainwindow.cpp \
     supertcpmanager.cpp \
-    epollengineer.cpp
+    epollengineer.cpp \
+    abstractsocket.cpp \
+    clientsocket.cpp \
+    serversocket.cpp \
+    httpserver.cpp \
+    httprequest.cpp \
+    httpresponse.cpp
 
 HEADERS  += mainwindow.h \
     supertcpmanager.h \
-    epollengineer.h
+    epollengineer.h \
+    abstractsocket.h \
+    clientsocket.h \
+    serversocket.h \
+    httpserver.h \
+    httprequest.h \
+    httpresponse.h
 
 FORMS    += mainwindow.ui
