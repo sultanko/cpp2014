@@ -2,11 +2,11 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "httpserver.h"
 #include "supertcpmanager.h"
+#include "httpserver.h"
 
 namespace Ui {
-    class MainWindow;
+class MainWindow;
 }
 
 class MainWindow : public QMainWindow
@@ -17,23 +17,21 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+signals:
+    void messageSignal(int v);
+
 public slots:
     void displayMessage(int count);
-
-
-signals:
-    void messageSignal(int count);
 
 private slots:
     void on_pushButton_clicked();
 
 private:
     Ui::MainWindow *ui;
-public:
-    std::vector<char> buf;
-    static const int BUF_SIZE = 1024*1024*2;
     QString fileName;
     HttpServer server;
+public:
+    std::vector<char> buf;
 };
 
 #endif // MAINWINDOW_H

@@ -22,7 +22,7 @@ void HttpServer::send(const HttpRequest &requestHttp, std::function<void(HttpRes
         HttpServer::userCallback = userCallback;
         SuperTcpManager::printDebug("connected to host");
     }
-    catch (SuperTcpManager::SuperTcpManagerException e)
+    catch (SuperTcpManager::SuperTcpManagerException const& e)
     {
         client = nullptr;
         throw HttpConnectionException();

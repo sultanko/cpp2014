@@ -36,7 +36,7 @@ void MainWindow::displayMessage(int count)
         {
             out << buf[i];
         }
-        ui->textBrowser->setText("Saved as" + fileName);
+//        ui->textBrowser->setText("Saved as" + fileName);
     }
 //    ui->textBrowser->setText(QString::fromUtf8(buf, count));
 }

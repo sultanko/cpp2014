@@ -23,7 +23,8 @@ SOURCES += main.cpp\
     serversocket.cpp \
     httpserver.cpp \
     httprequest.cpp \
-    httpresponse.cpp
+    httpresponse.cpp \
+    mylistitemwidget.cpp
 
 HEADERS  += mainwindow.h \
     supertcpmanager.h \
@@ -33,6 +34,8 @@ HEADERS  += mainwindow.h \
     serversocket.h \
     httpserver.h \
     httprequest.h \
-    httpresponse.h
+    httpresponse.h \
+    mylistitemwidget.h \
+    mainwindow.h
 
 FORMS    += mainwindow.ui
