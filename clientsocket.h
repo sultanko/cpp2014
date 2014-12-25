@@ -5,9 +5,7 @@
 #include "abstractsocket.h"
 #include "supertcpmanager.h"
 #include "serversocket.h"
-//#include "serversocket.h"
 
-//class AbstractSocket;
 class ServerSocket;
 
 class ClientSocket : public AbstractSocket

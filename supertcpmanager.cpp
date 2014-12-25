@@ -6,10 +6,10 @@
 
 
 SuperTcpManager::SuperTcpManager(std::shared_ptr<EpollEngineer> epollEngineerTmp)
-    : epollEngineer(epollEngineerTmp)
+    : epollEngineer(epollEngineerTmp),
+      serverPort("34349"),
+      serverHostname("INADDR_ANY")
 {
-    serverPort = "34349";
-    serverHostname = "INADDR_ANY";
     maxPendingConnections = 10;
     epollEngineer->addServer();
 }
@@ -21,14 +21,14 @@ SuperTcpManager::SuperTcpManager()
 
 SuperTcpManager::~SuperTcpManager()
 {
-    printDebug("Destructor manager start");
+    printMyDebug("Destructor manager start");
     while (!sockets.empty())
     {
         sockets.pop_back();
     }
     epollEngineer->removeServer();
-    printDebug("Destructor manager closed sockets");
-    printDebug("Destructor manager close");
+    printMyDebug("Destructor manager closed sockets");
+    printMyDebug("Destructor manager close");
 }
 
 void SuperTcpManager::makeSocketNonBlocking(int sfd)
@@ -71,7 +71,7 @@ int SuperTcpManager::createAndBind(const char* hostname, const char *port)
 
     if (bind(sock, (sockaddr*)(&name), sizeof name) == -1)
     {
-        printDebug("bind problem on", port, "num =", sock, "host", (inet_addr(hostname)));
+        printMyDebug("bind problem on", port, "num =", sock, "host", (inet_addr(hostname)));
         ::close(sock);
         throw SuperBindingException();
     }
@@ -82,7 +82,7 @@ int SuperTcpManager::createAndBind(const char* hostname, const char *port)
 
 ClientSocket * SuperTcpManager::connect(const char *hostname, const char *port, std::function<void(int)> clientFunc, char *clientBuffer, size_t clientBufferSize)
 {
-    printDebug("start connecting to", hostname, "on port", port);
+    printMyDebug("start connecting to", hostname, "on port", port);
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock == -1)
     {
@@ -108,7 +108,7 @@ ClientSocket * SuperTcpManager::connect(const char *hostname, const char *port, 
 
     makeSocketNonBlocking(sock);
 
-    printDebug("connected to", hostname, " on ", port);
+    printMyDebug("connected to", hostname, " on ", port);
     sockets.push_back(std::unique_ptr<ClientSocket>(new ClientSocket(sock, *this, clientFunc, clientBuffer, clientBufferSize)));
     return (ClientSocket*)sockets.back().get();
 }
@@ -126,7 +126,7 @@ ServerSocket * SuperTcpManager::listen(std::function<void(ClientSocket *)> newCo
 
 ServerSocket * SuperTcpManager::listen(const std::string &port, std::function<void(ClientSocket *)> newConnection)
 {
-    printDebug("start listening", port);
+    printMyDebug("start listening", port);
     int sfd = createAndBind(serverHostname.c_str(), port.c_str());
 
     if (::listen(sfd, maxPendingConnections) == -1)
@@ -138,7 +138,7 @@ ServerSocket * SuperTcpManager::listen(const std::string &port, std::function<vo
     makeSocketNonBlocking(sfd);
 
     sockets.push_back(std::unique_ptr<ServerSocket>(new ServerSocket(sfd, *this, newConnection)));
-    printDebug("end listening", port);
+    printMyDebug("end listening", port);
     return (ServerSocket*)sockets.back().get();
 }
 
@@ -195,7 +195,7 @@ void SuperTcpManager::removeSocket(AbstractSocket* asocket)
     }
     else
     {
-        printDebug("trouble");
+        printMyDebug("trouble");
     }
 }
 

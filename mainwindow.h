@@ -2,8 +2,10 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "supertcpmanager.h"
 #include "httpserver.h"
+#include <map>
+#include "downloadlistmodel.h"
+#include "downloadlistviewitemdelegate.h"
 
 namespace Ui {
 class MainWindow;
@@ -18,18 +20,21 @@ public:
     ~MainWindow();
 
 signals:
-    void messageSignal(int v);
+    void messageSignal(HttpResponse* resp);
 
 public slots:
-    void displayMessage(int count);
+    void saveFile(HttpResponse* resp);
 
 private slots:
     void on_pushButton_clicked();
 
 private:
     Ui::MainWindow *ui;
-    QString fileName;
+    DownloadListModel *listModel;
+    DownloadListViewItemDelegate *listViewItem;
     HttpServer server;
+    const QString defaultDir = "/home/sultan";
+    std::map<HttpResponse*, QPair<QString, int> > respToRow;
 public:
     std::vector<char> buf;
 };

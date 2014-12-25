@@ -7,12 +7,12 @@ AbstractSocket::AbstractSocket(int sockfd, SuperTcpManager& tcpManager)
     : sockfd(sockfd),
         tcpManager(tcpManager)
 {
-    SuperTcpManager::printDebug("Abstract constructor", sockfd);
+    SuperTcpManager::printMyDebug("Abstract constructor", sockfd);
 }
 
 AbstractSocket::~AbstractSocket()
 {
-    SuperTcpManager::printDebug("Abstract destructor", sockfd);
+    SuperTcpManager::printMyDebug("Abstract destructor", sockfd);
     tcpManager.close(sockfd);
 }
 

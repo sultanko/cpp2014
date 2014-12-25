@@ -8,21 +8,32 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    ui->textEdit->setText("https://androidnetworktester.googlecode.com/files/1mb.txt");
-    QObject::connect(this, &MainWindow::messageSignal, this, &MainWindow::displayMessage);
+//    ui->textEdit->setText("https://androidnetworktester.googlecode.com/files/10mb.txt");
+    ui->textEdit->setText("http://upload.wikimedia.org/wikipedia/en/thumb/2/24/Lenna.png/220px-Lenna.png");
+    QObject::connect(this, &MainWindow::messageSignal, this, &MainWindow::saveFile);
+    SuperTcpManager::printMyDebug("start Widget");
+    QListView *listView = ui->listView;
+    listViewItem = new DownloadListViewItemDelegate();
+    listModel = new DownloadListModel();
+    listView->setItemDelegate(listViewItem);
+    listView->setModel(listModel);
+    SuperTcpManager::printMyDebug("end Widget");
 }
 
 MainWindow::~MainWindow()
 {
+    delete listViewItem;
+    delete listModel;
     delete ui;
 }
 
-void MainWindow::displayMessage(int count)
+void MainWindow::saveFile(HttpResponse* resp)
 {
-    SuperTcpManager::printDebug("received", count);
-    if (!fileName.isEmpty())
+    SuperTcpManager::printMyDebug("received", resp->getResponseSize());
+    QString filename = respToRow[resp].first;
+    if (!filename.isEmpty())
     {
-        QFile file(fileName);
+        QFile file(filename);
         if (!file.open(QIODevice::WriteOnly))
         {
             QMessageBox::information(this, tr("Unable to open file"),
@@ -31,30 +42,56 @@ void MainWindow::displayMessage(int count)
         }
         QDataStream out(&file);
         out.setVersion(QDataStream::Qt_4_5);
-//        buf.push_back('\0');
-        for (size_t i = 0; i < buf.size(); i++)
-        {
-            out << buf[i];
-        }
-//        ui->textBrowser->setText("Saved as" + fileName);
+        out.writeRawData(resp->getResponseBuffer().data(), resp->getResponseSize());
+//        for (size_t i = 0; i < resp->getResponseSize(); i++)
+//        {
+//            out << resp->getResponseBuffer()[i];
+//        }
+        resp->close();
+        file.close();
     }
-//    ui->textBrowser->setText(QString::fromUtf8(buf, count));
 }
 
 void MainWindow::on_pushButton_clicked()
 {
 //    std::cerr << ui->textEdit->toPlainText().toStdString().c_str() << "\n";
     QString str = ui->textEdit->toPlainText();
-    fileName = QFileDialog::getSaveFileName(this, tr("Save file"), "", tr("All files(*)"));
+    int num3 = str.lastIndexOf("/");
+    QString nowDir = defaultDir + "/" + str.mid(num3 + 1, str.size() - num3 - 1);
+    QString filename = QFileDialog::getSaveFileName(this, tr("Save file"),  nowDir, tr("All files(*)"));
     int num = str.indexOf("://");
     int num2 = str.indexOf("/", num + 4);
+    if (filename.isEmpty())
+    {
+        return;
+    }
     HttpRequest request;
     request.setHost(str.mid(num + 3, num2 - num - 3).toStdString());
     request.setUrl(str.mid(num2, str.size() - num2).toStdString());
-    server.send(request, [&](HttpResponse response)
+    server.send(request, [&, filename](HttpResponse* response, int getted)
     {
-        this->buf.assign(response.getResponseBuffer().begin(), response.getResponseBuffer().end());
-        SuperTcpManager::printDebug("responseBuffer ixooooo", this->buf.data());
-        emit this->messageSignal((int) response.getResponseSize());
+        if (getted == -1)
+        {
+            return;
+        }
+        if (getted == 0)
+        {
+            int rowNum = ui->listView->model()->rowCount();
+            ui->listView->model()->insertRows(rowNum, 1);
+            respToRow[response] = QPair<QString, int>(filename, rowNum);
+            ui->listView->model()->setData(ui->listView->model()->index(rowNum, 0), QVariant::fromValue(
+                                               QPair<QString, double>(filename, 0)));
+            return;
+        }
+        SuperTcpManager::printMyDebug(respToRow[response].second);
+        ui->listView->model()->setData(ui->listView->model()->index(respToRow[response].second, 0),
+                                       QVariant::fromValue(QPair<QString, double>(respToRow[response].first,
+                                                                 1.0 * getted / response->getResponseSize())));
+        if (response->getResponseSize() == getted)
+        {
+            SuperTcpManager::printMyDebug("responseBuffer ixooooo");
+            emit this->messageSignal(response);
+        }
     });
 }
+

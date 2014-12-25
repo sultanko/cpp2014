@@ -8,7 +8,33 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f854e117-af14-4d69-949b-c45e97e7f58a" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/download_item_row.ui" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/downloadlistmodel.cpp" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/downloadlistmodel.h" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/downloadlistviewitem.cpp" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/downloadlistviewitem.h" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/downloadlistviewitemdelegate.cpp" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/downloadlistviewitemdelegate.h" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/mylistitemwidget.cpp" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/mylistitemwidget.h" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/abstractsocket.cpp" afterPath="$PROJECT_DIR$/abstractsocket.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/clientsocket.cpp" afterPath="$PROJECT_DIR$/clientsocket.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/clientsocket.h" afterPath="$PROJECT_DIR$/clientsocket.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/cursach.pro.user" afterPath="$PROJECT_DIR$/cursach.pro.user" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/cursach.pro" afterPath="$PROJECT_DIR$/cursach.pro" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/epollengineer.cpp" afterPath="$PROJECT_DIR$/epollengineer.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/httpresponse.cpp" afterPath="$PROJECT_DIR$/httpresponse.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/httpresponse.h" afterPath="$PROJECT_DIR$/httpresponse.h" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/httpserver.cpp" afterPath="$PROJECT_DIR$/httpserver.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/httpserver.h" afterPath="$PROJECT_DIR$/httpserver.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main.cpp" afterPath="$PROJECT_DIR$/main.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mainwindow.cpp" afterPath="$PROJECT_DIR$/mainwindow.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mainwindow.h" afterPath="$PROJECT_DIR$/mainwindow.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mainwindow.ui" afterPath="$PROJECT_DIR$/mainwindow.ui" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/serversocket.cpp" afterPath="$PROJECT_DIR$/serversocket.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/serversocket.h" afterPath="$PROJECT_DIR$/serversocket.h" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/supertcpmanager.cpp" afterPath="$PROJECT_DIR$/supertcpmanager.cpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/supertcpmanager.h" afterPath="$PROJECT_DIR$/supertcpmanager.h" />
     </list>
     <ignored path="cursach.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -32,7 +58,7 @@
       <file leaf-file-name="main.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/main.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="90" max-vertical-offset="1188">
+            <state vertical-scroll-proportion="0.0" vertical-offset="468" max-vertical-offset="1188">
               <caret line="26" column="10" selection-start-line="26" selection-start-column="10" selection-end-line="26" selection-end-column="10" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
@@ -44,7 +70,7 @@
       <file leaf-file-name="mainwindow.h" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/mainwindow.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="381" max-vertical-offset="810">
+            <state vertical-scroll-proportion="0.0" vertical-offset="414" max-vertical-offset="810">
               <caret line="23" column="0" selection-start-line="23" selection-start-column="0" selection-end-line="23" selection-end-column="0" />
               <folding>
                 <element signature="e#43#65#0" expanded="true" />
@@ -56,7 +82,7 @@
       <file leaf-file-name="mainwindow.cpp" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/mainwindow.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.67132866" vertical-offset="666" max-vertical-offset="1188">
+            <state vertical-scroll-proportion="0.0" vertical-offset="954" max-vertical-offset="1188">
               <caret line="53" column="4" selection-start-line="53" selection-start-column="4" selection-end-line="53" selection-end-column="4" />
               <folding>
                 <element signature="e#0#34#0" expanded="true" />
@@ -68,7 +94,7 @@
       <file leaf-file-name="httpserver.h" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/httpserver.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="144" max-vertical-offset="810">
+            <state vertical-scroll-proportion="0.0" vertical-offset="270" max-vertical-offset="810">
               <caret line="15" column="4" selection-start-line="15" selection-start-column="4" selection-end-line="15" selection-end-column="4" />
               <folding>
                 <element signature="e#43#67#0" expanded="true" />
@@ -81,7 +107,7 @@
       <file leaf-file-name="httpserver.cpp" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/httpserver.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="2340" max-vertical-offset="2862">
+            <state vertical-scroll-proportion="0.0" vertical-offset="2736" max-vertical-offset="2862">
               <caret line="152" column="0" selection-start-line="152" selection-start-column="0" selection-end-line="152" selection-end-column="0" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
@@ -93,7 +119,7 @@
       <file leaf-file-name="epollengineer.h" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/epollengineer.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="391" max-vertical-offset="936">
+            <state vertical-scroll-proportion="0.0" vertical-offset="918" max-vertical-offset="1188">
               <caret line="51" column="17" selection-start-line="51" selection-start-column="17" selection-end-line="51" selection-end-column="17" />
               <folding />
             </state>
@@ -113,7 +139,7 @@
       <file leaf-file-name="httpresponse.h" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/httpresponse.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="54" max-vertical-offset="1206">
+            <state vertical-scroll-proportion="0.0" vertical-offset="54" max-vertical-offset="1260">
               <caret line="3" column="1" selection-start-line="3" selection-start-column="1" selection-end-line="3" selection-end-column="1" />
               <folding />
             </state>
@@ -135,7 +161,7 @@
       <file leaf-file-name="httprequest.h" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/httprequest.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="540" max-vertical-offset="1062">
+            <state vertical-scroll-proportion="0.0" vertical-offset="1062" max-vertical-offset="1188">
               <caret line="59" column="4" selection-start-line="59" selection-start-column="4" selection-end-line="59" selection-end-column="4" />
               <folding>
                 <element signature="e#134#244#0" expanded="false" />
@@ -302,27 +328,27 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="65" y="24" width="1301" height="744" extended-state="6" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3287037" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24960877" sideWeight="0.49891067" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3287037" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3287037" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3287037" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.29166666" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3287037" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24960877" sideWeight="0.50108933" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39969134" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3287037" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.29166666" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3287037" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39969134" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
   <component name="Vcs.Log.UiProperties">
@@ -738,7 +764,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/mainwindow.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.67132866" vertical-offset="666" max-vertical-offset="1188">
+        <state vertical-scroll-proportion="0.0" vertical-offset="954" max-vertical-offset="1188">
           <caret line="53" column="4" selection-start-line="53" selection-start-column="4" selection-end-line="53" selection-end-column="4" />
           <folding>
             <element signature="e#0#34#0" expanded="true" />

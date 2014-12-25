@@ -11,7 +11,7 @@ ClientSocket::ClientSocket(int sockfd, SuperTcpManager &tcpManager, std::functio
     bufferSize(bufferSize),
     enableRead(true)
 {
-    SuperTcpManager::printDebug("Client constuctor full", sockfd);
+    SuperTcpManager::printMyDebug("Client constuctor full", sockfd);
     tcpManager.addSocket(sockfd, [&](epoll_event ev){
         if ((ev.events & EPOLLERR)
             || (ev.events & EPOLLHUP))
@@ -71,7 +71,7 @@ void ClientSocket::receiveData()
     enableRead = false;
     if (closeConnection)
     {
-        SuperTcpManager::printDebug("Close descriptor", sockfd);
+        SuperTcpManager::printMyDebug("Close descriptor", sockfd);
 
         userFunc(0);
         close();
@@ -84,7 +84,7 @@ void ClientSocket::receiveData()
 
 ClientSocket::~ClientSocket()
 {
-    SuperTcpManager::printDebug("Client destructor", sockfd);
+    SuperTcpManager::printMyDebug("Client destructor", sockfd);
 }
 
 void ClientSocket::close()

@@ -15,7 +15,7 @@ ServerSocket::ServerSocket(int sockfd, SuperTcpManager &manager, std::function<v
     : AbstractSocket(sockfd, manager),
     newConnection(newConnection)
 {
-    SuperTcpManager::printDebug("Server constructor", sockfd);
+    SuperTcpManager::printMyDebug("Server constructor", sockfd);
     tcpManager.addSocket(sockfd, [&](epoll_event ev)
     {
         if ((ev.events & EPOLLERR) ||
@@ -24,7 +24,7 @@ ServerSocket::ServerSocket(int sockfd, SuperTcpManager &manager, std::function<v
             return;
         }
         auto portFd = ev.data.fd;
-        SuperTcpManager::printDebug("input connection on", portFd);
+        SuperTcpManager::printMyDebug("input connection on", portFd);
         while (true)
         {
             sockaddr in_addr;
@@ -38,7 +38,7 @@ ServerSocket::ServerSocket(int sockfd, SuperTcpManager &manager, std::function<v
 
             SuperTcpManager::makeSocketNonBlocking(infd);
 
-            SuperTcpManager::printDebug("get accept on: ", infd);
+            SuperTcpManager::printMyDebug("get accept on: ", infd);
             char hbuf[NI_MAXHOST], sbuf[NI_MAXSERV];
 
             int s = getnameinfo(&in_addr, in_len,
@@ -47,7 +47,7 @@ ServerSocket::ServerSocket(int sockfd, SuperTcpManager &manager, std::function<v
                                 NI_NUMERICHOST | NI_NUMERICSERV);
             if (s == 0)
             {
-                SuperTcpManager::printDebug("Accepted connection desc =", infd, "host = ", hbuf, "port = ", sbuf);
+                SuperTcpManager::printMyDebug("Accepted connection desc =", infd, "host = ", hbuf, "port = ", sbuf);
                 this->clientSockets.push_back(std::unique_ptr<ClientSocket>(new ClientSocket(infd, this->tcpManager, this)));
                 this->newConnection((this->clientSockets.back().get()));
             }
@@ -69,7 +69,7 @@ void ServerSocket::removeClient(ClientSocket* client)
 
 ServerSocket::~ServerSocket()
 {
-    SuperTcpManager::printDebug("Server destructor", sockfd);
+    SuperTcpManager::printMyDebug("Server destructor", sockfd);
     while (!clientSockets.empty())
     {
         clientSockets.pop_back();

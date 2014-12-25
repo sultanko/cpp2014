@@ -24,7 +24,9 @@ SOURCES += main.cpp\
     httpserver.cpp \
     httprequest.cpp \
     httpresponse.cpp \
-    mylistitemwidget.cpp
+    downloadlistviewitem.cpp \
+    downloadlistviewitemdelegate.cpp \
+    downloadlistmodel.cpp
 
 HEADERS  += mainwindow.h \
     supertcpmanager.h \
@@ -35,7 +37,10 @@ HEADERS  += mainwindow.h \
     httpserver.h \
     httprequest.h \
     httpresponse.h \
-    mylistitemwidget.h \
-    mainwindow.h
+    mainwindow.h \
+    downloadlistviewitem.h \
+    downloadlistviewitemdelegate.h \
+    downloadlistmodel.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    download_item_row.ui

@@ -91,16 +91,16 @@ friend class ClientSocket;
 public:
 
     template<typename T, typename ... Args>
-    static void printDebug(T a, Args... args)
+    static void printMyDebug(T a, Args... args)
     {
 #ifndef QT_NO_DEBUG
         std::cerr << a << " ";
-        printDebug(args ...);
+        printMyDebug(args ...);
 #endif
     }
 
     template<typename T>
-    static void printDebug(T a)
+    static void printMyDebug(T a)
     {
 #ifndef QT_NO_DEBUG
         std::cerr << a << "\n";

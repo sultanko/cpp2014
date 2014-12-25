@@ -79,7 +79,7 @@ void EpollEngineer::writeMsg(int fd, const std::string& msg)
 
 void EpollEngineer::execute()
 {
-    SuperTcpManager::printDebug("start epoll");
+    SuperTcpManager::printMyDebug("start epoll");
     std::vector<epoll_event> events(MAXEVENTS);
     while (countServers > 0)
     {
@@ -90,27 +90,27 @@ void EpollEngineer::execute()
         }
         if (nfds == -1)
         {
-            SuperTcpManager::printDebug("epoll error");
+            SuperTcpManager::printMyDebug("epoll error");
             throw SuperTcpManager::SuperTcpManagerException();
 //            break;
         }
-        SuperTcpManager::printDebug("get epoll events count =", nfds);
+        SuperTcpManager::printMyDebug("get epoll events count =", nfds);
         for (int i = 0; i < nfds; i++)
         {
-            SuperTcpManager::printDebug("event on ", events[i].data.fd);
+            SuperTcpManager::printMyDebug("event on ", events[i].data.fd);
             fdFunc[events[i].data.fd](events[i]);
         }
     }
-    SuperTcpManager::printDebug("end epoll");
+    SuperTcpManager::printMyDebug("end epoll");
 
 }
 
 EpollEngineer::~EpollEngineer()
 {
-    SuperTcpManager::printDebug("Destructor epoll start");
+    SuperTcpManager::printMyDebug("Destructor epoll start");
     if (serverThread.joinable())
     {
         serverThread.join();
     }
-    SuperTcpManager::printDebug("Destructor epoll end");
+    SuperTcpManager::printMyDebug("Destructor epoll end");
 }
