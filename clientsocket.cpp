@@ -1,7 +1,7 @@
 #include <monetary.h>
 #include "clientsocket.h"
 #include "supertcpmanager.h"
-
+#include <cassert>
 
 ClientSocket::ClientSocket(int sockfd, SuperTcpManager &tcpManager, std::function<void(int)> dataReceived, char *buffer, size_t bufferSize, ServerSocket *server)
     : AbstractSocket(sockfd, tcpManager),
@@ -45,7 +45,8 @@ void ClientSocket::receiveData()
     size_t total = 0;
     while (true)
     {
-        ssize_t count = read(sockfd, buffer + total, bufferSize - total - 1);
+        std::cout << "read " << bufferSize << " " << total << " " << bufferSize - total << std::endl;
+        ssize_t count = read(sockfd, buffer + total, bufferSize - total );
         if (count == -1)
         {
             if (errno != EAGAIN)
@@ -61,8 +62,9 @@ void ClientSocket::receiveData()
         }
 
         total += count;
-        buffer[total] = '\0';
-        if (total + 1 >= bufferSize)
+//        buffer[total] = '\0';
+        assert(total <= bufferSize);
+        if (total == bufferSize)
         {
             break;
         }
@@ -109,7 +111,7 @@ void ClientSocket::send(const std::string &message)
             countSended = 0;
         }
         this->message = message;
-        tcpManager.setFdOptions(sockfd, EpollEngineer::DEFAULT_EVENTS | EPOLLOUT);
+        tcpManager.setFdOptions(sockfd, Epoll::DEFAULT_EVENTS | EPOLLOUT);
     }
 }
 
@@ -137,6 +139,6 @@ void ClientSocket::sendData()
     }
     if (writeBytes <= 0 || countSended == message.size())
     {
-        tcpManager.setFdOptions(sockfd, EpollEngineer::DEFAULT_EVENTS);
+        tcpManager.setFdOptions(sockfd, Epoll::DEFAULT_EVENTS);
     }
 }

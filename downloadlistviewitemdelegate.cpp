@@ -10,7 +10,6 @@ DownloadListViewItemDelegate::DownloadListViewItemDelegate(QObject *parent) :
 
 DownloadListViewItemDelegate::~DownloadListViewItemDelegate()
 {
-    delete itemWidget;
 }
 
 void DownloadListViewItemDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const

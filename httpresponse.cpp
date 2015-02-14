@@ -92,6 +92,8 @@ void HttpResponse::getHeadersSocket(int v)
         if (headerBuffer.size() - bufSize < 2)
         {
             headerBuffer.resize(bufSize * 2);
+            client->setBuffer(headerBuffer.data());
+            client->setBufferSize(headerBuffer.size());
         }
         client->setBufferSize(headerBuffer.size() - bufSize + 1);
     }

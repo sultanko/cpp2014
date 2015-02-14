@@ -30,8 +30,8 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    DownloadListModel *listModel;
-    DownloadListViewItemDelegate *listViewItem;
+    std::unique_ptr<DownloadListModel> listModel;
+    std::unique_ptr<DownloadListViewItemDelegate> listViewItem;
     HttpServer server;
     const QString defaultDir = "/home/sultan";
     std::map<HttpResponse*, QPair<QString, int> > respToRow;

@@ -19,11 +19,11 @@
 
 class SuperTcpManager;
 
-class EpollEngineer
+class Epoll
 {
     // using exceptions from SuperTcpManager
 public:
-    EpollEngineer();
+    Epoll();
     void addServer();
     void removeServer();
     void addFileDescriptor(int fd, std::function<void(epoll_event)> callFunc);
@@ -31,7 +31,7 @@ public:
     void setFdOpt(int fd, unsigned int opt);
     void writeMsg(int fd, const std::string& msg);
     void execute();
-    ~EpollEngineer();
+    ~Epoll();
 
 //signals:
 //    void newMessageEpoll(int socketFd, std::string message);
@@ -39,10 +39,12 @@ public:
 //    void closedConnection(int socketFd);
 
     static const int DEFAULT_EVENTS = EPOLLIN;
+    static std::atomic_bool sigHandle;
+    static std::atomic_bool epollRunning;
 private:
-    EpollEngineer(const EpollEngineer& ep) = delete;
-    EpollEngineer(EpollEngineer&& ep) = delete;
-    EpollEngineer& operator=(EpollEngineer& ep) = delete;
+    Epoll(const Epoll& ep) = delete;
+    Epoll(Epoll&& ep) = delete;
+    Epoll& operator=(Epoll& ep) = delete;
     void closeSocket(int sfd);
 
     std::atomic_int countServers;

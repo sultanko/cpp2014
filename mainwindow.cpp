@@ -3,9 +3,14 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    listModel(new DownloadListModel()),
+    listViewItem(new DownloadListViewItemDelegate())
+
 {
     ui->setupUi(this);
 //    ui->textEdit->setText("https://androidnetworktester.googlecode.com/files/10mb.txt");
@@ -13,18 +18,18 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(this, &MainWindow::messageSignal, this, &MainWindow::saveFile);
     SuperTcpManager::printMyDebug("start Widget");
     QListView *listView = ui->listView;
-    listViewItem = new DownloadListViewItemDelegate();
-    listModel = new DownloadListModel();
-    listView->setItemDelegate(listViewItem);
-    listView->setModel(listModel);
+    listView->setItemDelegate(listViewItem.get());
+    listView->setModel(listModel.get());
     SuperTcpManager::printMyDebug("end Widget");
 }
 
 MainWindow::~MainWindow()
 {
-    delete listViewItem;
-    delete listModel;
-    delete ui;
+    if (ui != nullptr)
+    {
+        delete ui;
+    }
+    ui = nullptr;
 }
 
 void MainWindow::saveFile(HttpResponse* resp)
@@ -72,6 +77,7 @@ void MainWindow::on_pushButton_clicked()
     {
         if (getted == -1)
         {
+            response->close();
             return;
         }
         if (getted == 0)

@@ -16,7 +16,7 @@
 #include <list>
 #include <dirent.h>
 
-class EpollEngineer;
+class Epoll;
 class AbstractSocket;
 class ServerSocket;
 class ClientSocket;
@@ -36,7 +36,7 @@ public:
     struct SuperInvalidArgumentException : public SuperTcpManagerException {};
     struct SuperSendException : public SuperTcpManagerException {};
 
-    SuperTcpManager(std::shared_ptr<EpollEngineer> epollEngineer);
+    SuperTcpManager(std::shared_ptr<Epoll> epollEngineer);
     SuperTcpManager();
 
     // return id of new connection
@@ -49,7 +49,7 @@ public:
     void close(int fd);
 
 
-    std::shared_ptr<EpollEngineer> getEpollEngineer();
+    std::shared_ptr<Epoll> getEpollEngineer();
     ~SuperTcpManager();
 
     const std::string& getServerPort() const;
@@ -79,12 +79,9 @@ private:
     std::string serverHostname;
     std::string serverPort;
     int maxPendingConnections;
-    std::shared_ptr<EpollEngineer> epollEngineer;
+    std::shared_ptr<Epoll> epollEngineer;
 
-private:
-    static std::vector<SuperTcpManager*> managers;
-
-friend class EpollEngineer;
+friend class Epoll;
 friend class ServerSocket;
 friend class ClientSocket;
 

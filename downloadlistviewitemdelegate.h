@@ -3,6 +3,7 @@
 
 #include <QItemDelegate>
 #include "downloadlistviewitem.h"
+#include <memory>
 
 class DownloadListViewItemDelegate : public QItemDelegate
 {
@@ -18,7 +19,7 @@ signals:
 public slots:
 
 protected:
-    DownloadListViewItem* itemWidget;
+    std::unique_ptr<DownloadListViewItem> itemWidget;
 };
 
 #endif // DOWNLOADLISTVIEWITEMDELEGATE_H

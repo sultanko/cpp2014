@@ -8,23 +8,26 @@
 #include <netdb.h>
 #include <sys/un.h>
 
-EpollEngineer::EpollEngineer()
+std::atomic_bool Epoll::sigHandle(false);
+std::atomic_bool Epoll::epollRunning(true);
+
+Epoll::Epoll()
 {
     epollFileDescriptor = epoll_create1(0);
-    epollTimeout = 1500;
+    epollTimeout = 3000;
     countServers = 0;
 }
 
-void EpollEngineer::addServer()
+void Epoll::addServer()
 {
     countServers++;
     if (countServers == 1)
     {
-        serverThread = std::thread(&EpollEngineer::execute, this);
+        serverThread = std::thread(&Epoll::execute, this);
     }
 }
 
-void EpollEngineer::removeServer()
+void Epoll::removeServer()
 {
     countServers--;
     if (countServers == 0)
@@ -33,7 +36,7 @@ void EpollEngineer::removeServer()
     }
 }
 
-void EpollEngineer::addFileDescriptor(int fd, std::function<void(epoll_event)> callFunc)
+void Epoll::addFileDescriptor(int fd, std::function<void(epoll_event)> callFunc)
 {
     event.data.fd = fd;
     event.events = DEFAULT_EVENTS;
@@ -47,21 +50,22 @@ void EpollEngineer::addFileDescriptor(int fd, std::function<void(epoll_event)> c
     }
 }
 
-void EpollEngineer::closeSocket(int sfd)
+void Epoll::closeSocket(int sfd)
 {
+    SuperTcpManager::printMyDebug("close", sfd);
     if (::close(sfd) == -1)
     {
         throw SuperTcpManager::SuperSocketCloseException();
     }
 }
 
-void EpollEngineer::removeFileDescriptor(int fd)
+void Epoll::removeFileDescriptor(int fd)
 {
     closeSocket(fd);
     fdFunc.erase(fd);
 }
 
-void EpollEngineer::setFdOpt(int fd, unsigned int opt)
+void Epoll::setFdOpt(int fd, unsigned int opt)
 {
     event.data.fd = fd;
     event.events = opt;
@@ -71,19 +75,30 @@ void EpollEngineer::setFdOpt(int fd, unsigned int opt)
     }
 }
 
-void EpollEngineer::writeMsg(int fd, const std::string& msg)
+void Epoll::writeMsg(int fd, const std::string& msg)
 {
     ::write(fd, msg.c_str(), msg.size());
 }
 
 
-void EpollEngineer::execute()
+void Epoll::execute()
 {
     SuperTcpManager::printMyDebug("start epoll");
     std::vector<epoll_event> events(MAXEVENTS);
     while (countServers > 0)
     {
         int nfds = epoll_wait (epollFileDescriptor, events.data(), (int)events.size(), epollTimeout);
+        if (sigHandle)
+        {
+            for (auto it : fdFunc)
+            {
+                closeSocket(it.first);
+            }
+            fdFunc.clear();
+            countServers = 0;
+            epollRunning = false;
+            break;
+        }
         if (nfds == 0)
         {
             continue;
@@ -105,12 +120,13 @@ void EpollEngineer::execute()
 
 }
 
-EpollEngineer::~EpollEngineer()
+Epoll::~Epoll()
 {
     SuperTcpManager::printMyDebug("Destructor epoll start");
     if (serverThread.joinable())
     {
         serverThread.join();
     }
+    epollRunning = false;
     SuperTcpManager::printMyDebug("Destructor epoll end");
 }

@@ -5,7 +5,7 @@
 #include <dirent.h>
 
 
-SuperTcpManager::SuperTcpManager(std::shared_ptr<EpollEngineer> epollEngineerTmp)
+SuperTcpManager::SuperTcpManager(std::shared_ptr<Epoll> epollEngineerTmp)
     : epollEngineer(epollEngineerTmp),
       serverPort("34349"),
       serverHostname("INADDR_ANY")
@@ -15,7 +15,7 @@ SuperTcpManager::SuperTcpManager(std::shared_ptr<EpollEngineer> epollEngineerTmp
 }
 
 SuperTcpManager::SuperTcpManager()
-    : SuperTcpManager(std::shared_ptr<EpollEngineer>(new EpollEngineer()))
+    : SuperTcpManager(std::shared_ptr<Epoll>(new Epoll()))
 {
 }
 
@@ -114,7 +114,7 @@ ClientSocket * SuperTcpManager::connect(const char *hostname, const char *port, 
 }
 
 
-std::shared_ptr<EpollEngineer> SuperTcpManager::getEpollEngineer()
+std::shared_ptr<Epoll> SuperTcpManager::getEpollEngineer()
 {
     return epollEngineer;
 }

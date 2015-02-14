@@ -36,6 +36,8 @@ public:
     void setResponseSize(size_t responseSize)
     {
         responseBuffer.resize(responseSize);
+        client->setBuffer(responseBuffer.data());
+        client->setBufferSize(responseSize);
     }
 
     const std::vector<char>& getResponseBuffer() const
